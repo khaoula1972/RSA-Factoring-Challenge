@@ -1,44 +1,46 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <gmp.h>
+#include <string.h>
 
-void factorize_ulonglong(unsigned long long int number) {
-    unsigned long long int sqrt_n = (unsigned long long int)sqrt(number);
-    unsigned long long int i = 2;
+int main(int argc, char *argv[])
+{
+	FILE *stream;
+	char *line = NULL;
+	size_t len = 0;
+	long long flag = 1, div, rest, number, counter;
+	ssize_t nread;
 
-    while (i <= sqrt_n) {
-        unsigned long long int q = number / i;
-        unsigned long long int r = number % i;
+	if (argc != 2) {
+		fprintf(stderr, "Usage: %s <file>\n", argv[0]);
+		exit(EXIT_FAILURE);
+	}
 
-        if (r == 0) {
-            printf("%llu=%llu*%llu\n", number, q, i);
-            return;
-        }
+	stream = fopen(argv[1], "r");
+	if (stream == NULL) {
+		perror("fopen");
+		exit(EXIT_FAILURE);
+	}
 
-        i++;
-    }
+	while ((nread = getline(&line, &len, stream)) != -1) {
+		flag = 1, div = 2;
+		number = atoll(line);
+		while (flag) {
+			rest = number % div;
+			if (!rest) {
+				counter = number / div;
+				printf("%lld=%lld*%lld\n", number, counter, div);
+				flag = 0;
+			}
+			div++;
+		}
+	}
 
-    printf("%llu=%llu*1\n", number, number);
-}
-
-int main(int argc, char* argv[]) {
-    if (argc != 2) {
-        printf("Usage: factors <file>\n");
-        return 1;
-    }
-
-    FILE* file = fopen(argv[1], "r");
-    if (file == NULL) {
-        printf("File '%s' not found.\n", argv[1]);
-        return 1;
-    }
-
-    unsigned long long int number;
-
-    while (fscanf(file, "%llu", &number) != EOF) {
-        factorize_ulonglong(number);
-    }
-
-    fclose(file);
-    return 0;
+	free(line);
+	fclose(stream);
+	exit(EXIT_SUCCESS);
 }
