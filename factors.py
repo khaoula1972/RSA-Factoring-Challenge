@@ -1,32 +1,28 @@
 #!/usr/bin/python3
 
+
 import sys
-import math
+import sympy as sp
 
-def factorize(number):
-    factors = []
-    sqrt_n = int(math.sqrt(number))
-    for i in range(2, sqrt_n + 1):
-        if number % i == 0:
-            factors.append((i, number // i))
-    return factors
+def find_first_divisor(num_str):
+    num = int(num_str)
+    divisors = list(sp.divisors(num))
+    
+    if len(divisors) >= 2:
+        p = divisors[1]
+        q = num // p
+        print(f"{num}={q}*{p}")
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: factors <file>")
-        return
-
-    input_file = sys.argv[1]
-
-    try:
-        with open(input_file, 'r') as file:
-            for line in file:
-                number = int(line.strip())
-                factor_pairs = factorize(number)
-                for p, q in factor_pairs:
-                    print(f"{number}={p}*{q}")
-    except FileNotFoundError:
-        print(f"File '{input_file}' not found.")
+def main(filename):
+    with open(filename, 'r') as file:
+        for line in file:
+            num_str = line.strip()
+            find_first_divisor(num_str)
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        print("Usage: python factors.py <file>")
+        sys.exit(1)
+    filename = sys.argv[1]
+    main(filename)
+
